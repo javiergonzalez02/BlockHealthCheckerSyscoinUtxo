@@ -1,7 +1,10 @@
 import requests
+import time
 
-start_height = 1867070  # Initial block height
+start_height = 1865408  # Initial block height
 end_height = 1867075  # Final block height (inclusive)
+batch_size = 10  # Number of blocks to process in each batch
+pause_duration = 1  # Pause duration between batches in seconds
 
 
 def get_block_time(block_height):
@@ -17,17 +20,34 @@ def get_block_time(block_height):
 
 
 def calculate_block_time_differences(start_height, end_height):
-    """Calculates the time difference between consecutive blocks in a range."""
+    """Calculates the time difference between consecutive blocks in a range, processing in batches."""
     previous_time = None
     differences = []
 
-    for height in range(start_height, end_height):
-        current_time = get_block_time(height)
-        if previous_time is not None:
-            # Calculate the difference in seconds
-            time_diff = current_time - previous_time
-            differences.append(time_diff)
-        previous_time = current_time
+    current_height = start_height
+    while current_height < end_height:
+        # Process blocks in batches of batch_size
+        batch_end = min(current_height + batch_size, end_height + 1)
+
+        batch_differences = []
+        batch_previous_time = None
+
+        for height in range(current_height, batch_end):
+            current_time = get_block_time(height)
+            if batch_previous_time is not None:
+                # Calculate the difference in seconds
+                time_diff = current_time - batch_previous_time
+                batch_differences.append(time_diff)
+            batch_previous_time = current_time
+
+        differences.extend(batch_differences)
+
+        # Move to the next batch
+        current_height = batch_end
+
+        # Pause between batches
+        print(f'Pausing for {pause_duration} seconds...')
+        time.sleep(pause_duration)
 
     return differences
 
