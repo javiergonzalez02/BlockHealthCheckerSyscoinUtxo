@@ -1,10 +1,10 @@
 import requests
 import time
 
-start_height = 1865408  # Initial block height
+start_height = 1867020  # Initial block height
 end_height = 1867075  # Final block height (inclusive)
 batch_size = 10  # Number of blocks to process in each batch
-pause_duration = 1  # Pause duration between batches in seconds
+pause_duration = 0.2  # Pause duration between batches in seconds
 
 
 def get_block_time(block_height):
@@ -58,17 +58,18 @@ def analyze_differences(differences):
         return {
             'average': None,
             'count_above_2_5_minutes': 0,
+            'count_below_2_5_minutes': 0,
             'count_above_2_5_minutes_individual': 0
         }
 
     average_diff = sum(differences) / len(differences)
     count_above_2_5_minutes = sum(1 for diff in differences if diff > 150)
-    count_above_2_5_minutes_individual = sum(1 for diff in differences if diff > 150)
+    count_below_2_5_minutes = sum(1 for diff in differences if diff < 150)
 
     return {
         'average': average_diff,
         'count_above_2_5_minutes': count_above_2_5_minutes,
-        'count_above_2_5_minutes_individual': count_above_2_5_minutes_individual
+        'count_below_2_5_minutes': count_below_2_5_minutes,
     }
 
 
@@ -87,8 +88,9 @@ def main():
     if analysis['average'] is not None:
         print(f'\nAverage duration between blocks: {analysis["average"]:.2f} seconds')
     print(f'Number of time intervals between blocks longer than 2.5 minutes: {analysis["count_above_2_5_minutes"]}')
-    print(f'Number of individual intervals longer than 2.5 minutes: {analysis["count_above_2_5_minutes_individual"]}')
+    print(f'Number of time intervals between blocks shorter than 2.5 minutes: {analysis["count_below_2_5_minutes"]}')
 
 
 if __name__ == "__main__":
     main()
+
